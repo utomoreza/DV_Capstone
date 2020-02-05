@@ -1,0 +1,6 @@
+"0","flights$sched_dep_time <- as.character(sapply(flights$sched_dep_time, convertToHMchar))
+"
+"1","Called from: "
+"1","FUN(X[[i]], ...)
+"
+"0","Q"

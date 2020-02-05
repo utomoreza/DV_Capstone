@@ -1,0 +1,157 @@
+---
+title: "Briefing DV capstone"
+author: "`r Sys.info()[7]`"
+date: "`r Sys.Date()`"
+output: 
+ html_document:
+   toc: true
+   toc_float: true
+   highlight: zenburn
+   df_print: paged
+   theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+File ini berisi template untuk mejawab pertanyaan 5W+1H saat briefing Capstone Data Visualization sebagai langkah awal sebelum membuat Dashboard. Silakan Bapak/Ibu mengisi jawaban di bawah. 
+
+File ini tidak akan dinilai namun Bapak/Ibu **WAJIB** men-submit-nya ke dalam classroom pada hari H briefing Capstone Data Visualization.
+
+# What
+
+Tentukan tujuan atau informasi yang ingin ditampilkan dalam dashboard
+
+**Jawab**
+
+Maksud yang ingin dicapai:
+
+Menampilkan variasi plot dari data penerbangan (seperti maskapai, bandara tujuan, penerbangan, armada pesawat, dan cuaca) di tiga bandara di New York City, yaitu LaGuardia Airport (LGA), John F. Kennedy International Airport (JFK), dan Newark Liberty International Airport (EWR), pada tahun 2013.
+
+Tujuan yang ingin disampaikan:
+
+1. Menampilkan peta yang menunjukkan air traffic dari tiga bandara di NYC pada tahun 2013
+2. Menampilkan perbandingan total jumlah penerbangan di antara ketiga bandara di NYC pada tahun 2013
+3. Menampilkan persebaran data jam terbang pada ketiga bandara di NYC pada tahun 2013
+4. Menampilkan persebaran data tahun pembuatan pesawat dari tiap maskapai yang beroperasi di ketiga bandara NYC pada tahun 2013
+5. Menampilkan 5 perusahaan pembuat pesawat yang produknya paling sering mengalami delay di penerbangan di ketiga bandara di NYC pada tahun 2013
+6. Menampilkan persebaran data merk pesawat yang sering dibeli berbagai maskapai
+7. Menampilkan hubungan/korelasi antara delay dan kondisi cuaca pada penerbangan di ketiga bandara di NYC pada tahun 2013
+8. Menampilkan perbandingan total jumlah penerbangan tiap maskapai yang ada di masing-masing bandara di NYC pada tahun 2013
+9. Menampilkan perbandingan kondisi cuaca di antara ketiga bandara
+
+# Who
+
+Untuk siapa dashboard ini dibuat? Siapa target pembaca dari dashboard ini?
+
+**Jawab**
+
+Khalayak umum, terutama orang-orang yang aware terhadap air traffic.
+
+# Why
+
+Apakah data yang dibuat relevan atau sesuai dengan tujuan? Mengapa?
+
+**Jawab**
+
+Ya, relevan, karena data yang didapatkan merepresentasikan dan menyediakan poin-poin untuk mencapai maksud dan tujuan.
+
+# When
+
+Apakah data yang digunakan masih *up to date* atau masih relevan dengan kondisi sekarang? Apakah ada informasi tentang tanggal update terakhir dari data tersebut?
+
+**Jawab**
+
+Data dipublikasi pada tanggal 16 September 2019, still fresh from the oven. Walaupun data yang ditampilkan adalah data tahun 2013, data tersebut masih cukup relevan dengan kondisi saat ini, dan mengingat bahwa saya tidak mempedulikan variabel waktu dalam bentuk tahun.
+
+# Where
+
+Bagaimana desain layout atau tata letak dashboard yang akan dibuat?
+
+**Jawab**
+
+`Air Traffic` Page
+
+- Peta air traffic - leaflet - Tujuan No. 1
+- Perbandingan jumlah penerbangan di antara ketiga bandara - `geom_col` - Tujuan No. 2
+   - `Input` penerbangan di LGA - `geom_col`
+   - `Input` penerbangan di JFK - `geom_col`
+   - `Input` penerbangan di EWR - `geom_col`
+- Persebaran jam terbang di antara ketiga bandara - `geom_boxplot`/`geom_jitter` - Tujuan No. 3
+- Perbandingan jumlah penerbangan tiap maskapai di ketiga bandara - `multi-level pie chart` - Tujuan No. 8
+
+`Fleet` Page
+
+- Armada yang sering terjadi delay - `geom_jitter`/`geom_smooth` - Tujuan No. 5
+- Persebaran tahun pembuatan armada - `geom_jitter`/`geom_smooth` - Tujuan No. 4
+- Persebaran merk pesawat yang sering dibeli maskapai - `geom_jitter`/`geom_smooth` - Tujuan No. 6
+
+`Weather` Page
+
+- Hubungan delay dengan cuaca - `geom_jitter`/`geom_smooth` - Tujuan No. 7
+   - `Input` Hubungan dengan temperatur - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan dewpoint - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan kelembapan - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan arah angin - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan wind speed - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan wind gust - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan curah hujan - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan tekanan udara - `geom_jitter`/`geom_smooth`
+   - `Input` Hubungan dengan jarak pandang - `geom_jitter`/`geom_smooth`
+- Perbandingan kondisi cuaca di antara ketiga bandara - `spider_chart` - Tujuan No. 9
+
+`Data` Page
+
+# How
+
+Bagaimana Bapak/Ibu menggunakan visualisasi untuk menjawab tujuan yang telah disebutkan? 
+
+Buat plot yang akan dimasukkan ke dalam dashboard. Boleh dalam bentuk `ggplot` maupun `plotly`.
+
+**Jawab**
+
+* `geom_col` Page
+
+```{r}
+# # your code here
+# install.packages('ggplot2')
+# library(ggplot2)
+# ggplot(data, aes(x, y)) +
+#    geom_col()
+```
+
+* `geom_boxplot`
+
+```{r}
+# # your code here
+# install.packages('ggplot2')
+# library(ggplot2)
+# ggplot(data, aes(x, y)) +
+#    geom_boxplot()
+```
+
+* `geom_jitter`
+
+```{r}
+# # your code here
+# install.packages('ggplot2')
+# library(ggplot2)
+# ggplot(data, aes(x, y)) +
+#    geom_jitter()
+```
+
+* `spider_chart`
+
+```{r}
+#install.packages('ggradar')
+# library(ggradar)
+```
+
+* `leaflet`
+
+```{r}
+#install.packages("leaflet")
+# library(leaflet)
+```
+

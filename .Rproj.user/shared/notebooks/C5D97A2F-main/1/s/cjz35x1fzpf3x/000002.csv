@@ -1,0 +1,11 @@
+"0","airports[nrow(airports)+1,] <- c(""BQN"", # FAA code
+                               ""Rafael Hernández Airport"", # Airport name
+                               18.49486, # Latitude
+                               -67.12944, # Longitude
+                               237, # Altitude
+                               -4, # Time zone offset from UTC
+                               N, # Does daylight saving time exist?
+                               ""America/Puerto_Rico"") # Time zone
+"
+"2","Error: object 'N' not found
+"

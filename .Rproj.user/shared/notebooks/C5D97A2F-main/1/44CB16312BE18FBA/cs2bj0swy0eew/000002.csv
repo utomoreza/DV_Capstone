@@ -1,0 +1,5 @@
+"0","sprintf(fmt = ""%02d:%02d"", flights$dep_delay[1])
+"
+"2","Error in sprintf(fmt = ""%02d:%02d"", flights$dep_delay[1]) : 
+  too few arguments
+"

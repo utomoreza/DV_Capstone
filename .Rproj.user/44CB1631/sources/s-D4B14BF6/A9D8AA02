@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580861736981.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3613374783",
+    "id" : "A9D8AA02",
+    "lastKnownWriteTime" : 1580945020,
+    "last_content_update" : 1580945020990,
+    "path" : "~/.rstudio-desktop/projects/DV_Capstone/main.Rmd",
+    "project_path" : "main.Rmd",
+    "properties" : {
+        "cursorPosition" : "155,0",
+        "last_setup_crc32" : "D4B14BF6bb338d19",
+        "scrollLine" : "147"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

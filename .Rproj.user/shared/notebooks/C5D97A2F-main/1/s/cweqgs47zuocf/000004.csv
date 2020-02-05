@@ -1,0 +1,4 @@
+"0","mdn_dep_delay <- median(flights$dep_delay, na.rm = T)"
+"0","mdn_arr_delay <- median(flights$arr_delay, na.rm = T)"
+"0","flights$dep_delay <- replace_na(data = flights$dep_delay, replace = mdn_dep_delay)"
+"0","flights$arr_delay <- replace_na(data = flights$arr_delay, replace = mdn_arr_delay)"
