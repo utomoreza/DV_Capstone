@@ -258,10 +258,10 @@ There's a problem. Rafael Hernández Airport, with BQN code, does exist in the `
 ```{r}
 airports[nrow(airports)+1,] <- c("BQN", # FAA code
                                "Rafael Hernández Airport", # Airport name
-                               as.numeric(18.49486), # Latitude
-                               as.numeric(-67.12944), # Longitude
-                               as.numeric(237), # Altitude
-                               as.numeric(-4), # Time zone offset from UTC
+                               18.49486, # Latitude
+                               -67.12944, # Longitude
+                               237, # Altitude
+                               -4, # Time zone offset from UTC
                                "N", # Does daylight saving time exist?
                                "America/Puerto_Rico") # Time zone
 ```
