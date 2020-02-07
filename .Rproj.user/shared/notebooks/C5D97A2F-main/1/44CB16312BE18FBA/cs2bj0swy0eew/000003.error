@@ -1,1 +1,0 @@
-{"frames":[{"character_number":0,"end_character_number":0,"end_line_number":0,"file":"","func":"sprintf(fmt = \"%02d:%02d\", flights$dep_delay[1])","line_number":0}],"message":"Error in sprintf(fmt = \"%02d:%02d\", flights$dep_delay[1]) : \n  too few arguments\n"}

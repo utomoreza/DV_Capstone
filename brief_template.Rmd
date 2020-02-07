@@ -27,19 +27,18 @@ Tentukan tujuan atau informasi yang ingin ditampilkan dalam dashboard
 
 Maksud yang ingin dicapai:
 
-Menampilkan variasi plot dari data penerbangan (seperti maskapai, bandara tujuan, penerbangan, armada pesawat, dan cuaca) di tiga bandara di New York City, yaitu LaGuardia Airport (LGA), John F. Kennedy International Airport (JFK), dan Newark Liberty International Airport (EWR), pada tahun 2013.
+Menampilkan variasi plot dari data harapan hidup (seperti life expectancy, bandara tujuan, penerbangan, armada pesawat, dan cuaca) di tiga bandara di New York City, yaitu LaGuardia Airport (LGA), John F. Kennedy International Airport (JFK), dan Newark Liberty International Airport (EWR), pada tahun 2013.
 
 Tujuan yang ingin disampaikan:
 
-1. Menampilkan peta yang menunjukkan air traffic dari tiga bandara di NYC pada tahun 2013
-2. Menampilkan perbandingan total jumlah penerbangan di antara ketiga bandara di NYC pada tahun 2013
-3. Menampilkan persebaran data jam terbang pada ketiga bandara di NYC pada tahun 2013
-4. Menampilkan persebaran data tahun pembuatan pesawat dari tiap maskapai yang beroperasi di ketiga bandara NYC pada tahun 2013
-5. Menampilkan 5 perusahaan pembuat pesawat yang produknya paling sering mengalami delay di penerbangan di ketiga bandara di NYC pada tahun 2013
-6. Menampilkan persebaran data merk pesawat yang sering dibeli berbagai maskapai
-7. Menampilkan hubungan/korelasi antara delay dan kondisi cuaca pada penerbangan di ketiga bandara di NYC pada tahun 2013
-8. Menampilkan perbandingan total jumlah penerbangan tiap maskapai yang ada di masing-masing bandara di NYC pada tahun 2013
-9. Menampilkan perbandingan kondisi cuaca di antara ketiga bandara
+1. Menampilkan peta yang menunjukkan data life expectancy tiap negara pada rentang waktu tertentu
+2. Menampilkan grafik perbandingan pertumbuhan life expectancy negara-negara tertentu pada rentang waktu tertentu
+3. Menampilkan grafik perbandingan pertumbuhan life expectancy semua benua pada rentang waktu tertentu
+4. Menampilkan grafik perbandingan life expectancy laki-laki dan perempuan di negara-negara dunia
+5. Menampilkan grafik perbandingan median age antara negara-negara tertentu pada rentang waktu tertentu
+6. Menampilkan hubungan/korelasi antara median age dengan life expectancy, healthcare expenditure, dan GDP per capita
+7. Menampilkan hubungan/korelasi antara life expectancy dengan healthcare expenditure
+8. Menampilkan hubungan/korelasi antara life expectancy dengan GDP per capita
 
 # Who
 

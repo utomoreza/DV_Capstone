@@ -118,6 +118,7 @@ First of all, load all necessary packages.
 ```{r, results=FALSE}
 library(tidyverse)
 library(lubridate)
+library(tibble)
 ```
 
 Save the dataframes from `nycflights13` to dataframe objects in `Global Environment`.
@@ -183,6 +184,10 @@ airports[is.na(airports$tzone), "tzone"] <- c("America/New_York","America/New_Yo
 * NA Values in `flights`
 
 ```{r}
+flights[is.na(flights$dep_time),]
+```
+
+```{r}
 is.na(flights) %>% colSums()
 ```
 
@@ -217,7 +222,7 @@ Excellent! We've got `dep_delay` and `arr_delay` columns all filled in. Now, by 
 ```{r}
 convertToHMchar <- function(input) {
    input <- as.character(input)
-   browser()
+   # browser()
    if (nchar(input) == 4) {
       output <- paste0(gsub("..$", replacement = "", x = input),
                        ":",
@@ -228,7 +233,7 @@ convertToHMchar <- function(input) {
                        ":", 
                        gsub("^.", replacement = "", x = input))
    }
-   browser()
+   # browser()
    return(output)
 }
 
@@ -249,11 +254,40 @@ convertToHMchar <- function(input) {
 # }
 
 flights$sched_dep_time <- as.character(sapply(flights$sched_dep_time, convertToHMchar))
-flights$sched_arr_time <- as.character(sapply(flights$sched_arr_time, convertToHMchar))
-convertToHMchar(flights$sched_arr_time[4])
 ```
 
-There's a problem. Rafael Hernández Airport, with BQN code, does exist in the `flights` dataframe, but it is not listed in `airports` dataframe. Therefore, we have to add manually a row in `airports` indicating BQN airport.
+```{r}
+# change format sched_dep_time to POSIXct
+flights$sched_dep_time <- as.POSIXct(paste0(flights$year, "-", 
+                        flights$month,"-", 
+                        flights$day, " ", 
+                        flights$sched_dep_time), 
+                 tz = "America/New_York")
+
+# Calculate actual dep_time by adding dep_delay to sched_dep_time
+flights$dep_time <- flights$sched_dep_time + flights$dep_delay*60
+```
+
+Now, we need to left-join `flights` dataframe with `airports` dataframe in order to fix the `arr_time` and `sched_arr_time` colums. We left-join both on `dest` and `faa`, respectively.
+
+```{r}
+flight_airports <- left_join(x = flights, y = airports, by = c("dest" = "faa"))
+```
+
+Since we used left-join, there's probability that any NA exist. Let's check it.
+
+```{r}
+flight_airports %>% is.na() %>% colSums()
+```
+
+There are NAs in the columns of `airports` table part. This indicates that there are flights to the destination airports not listed yet in `airports` table. First, let's see them to check how many airports don't have data in `airports` dataframe.
+
+```{r}
+NAinLeftJoin <- flight_airports[is.na(flight_airports$name),]
+unique(NAinLeftJoin$dest)
+```
+
+Good. There are only four airports not included in `airports` dataframe. Let's google their data and manually enter them in the table.
 
 ```{r}
 airports[nrow(airports)+1,] <- c("BQN", # FAA code
@@ -264,18 +298,240 @@ airports[nrow(airports)+1,] <- c("BQN", # FAA code
                                -4, # Time zone offset from UTC
                                "N", # Does daylight saving time exist?
                                "America/Puerto_Rico") # Time zone
+
+airports[nrow(airports)+1,] <- c("SJU", # FAA code
+                               "Luis Muñoz Marín International Airport", # Airport name
+                               18.436703, # Latitude
+                               -66.00467, # Longitude
+                               8.86, # Altitude
+                               -4, # Time zone offset from UTC
+                               "N", # Does daylight saving time exist?
+                               "America/Puerto_Rico") # Time zone
+
+airports[nrow(airports)+1,] <- c("STT", # FAA code
+                               "Cyril E. King Airport", # Airport name
+                               18.3357, # Latitude
+                               -64.9707, # Longitude
+                               23, # Altitude
+                               -4, # Time zone offset from UTC
+                               "N", # Does daylight saving time exist?
+                               "America/St_Thomas") # Time zone
+
+airports[nrow(airports)+1,] <- c("PSE", # FAA code
+                               "Mercedita International Airport", # Airport name
+                               18.0106, # Latitude
+                               -66.5631, # Longitude
+                               29, # Altitude
+                               -4, # Time zone offset from UTC
+                               "N", # Does daylight saving time exist?
+                               "America/St_Thomas") # Time zone   
 ```
 
+Then, perform left-join again and directly re-check the NA values.
+
+```{r}
+flight_airports <- left_join(x = flights, y = airports, by = c("dest" = "faa"))
+flight_airports %>% is.na() %>% colSums()
+```
+
+Nice. All NAs from the `airport` table have gone.
+
+Calculate mean/median of the difference of flight time and air time
+
+```{r}
+# collect all data without abnormal formats in sched_arr_time or arr_time and without NAs in air_time
+normal_arrTime <- flight_airports[
+   !(
+      (grepl(
+         pattern = "^.$", 
+         x = flight_airports$arr_time) |
+          grepl(pattern = "^..$", 
+                x = flight_airports$arr_time)) | 
+         (grepl(pattern = "^.$", 
+                x = flight_airports$sched_arr_time) |
+             grepl(pattern = "^..$", 
+                   x = flight_airports$sched_arr_time)) |
+         is.na(flight_airports$air_time)),]
+
+# change format of sched_arr_time to appropriate format
+normal_arrTime$sched_arr_time <- as.character(sapply(normal_arrTime$sched_arr_time, convertToHMchar))
+```
+
+```{r}
+normal_arrTime %>% is.na() %>% colSums()
+normal_arrTime$sched_arr_time
+```
+
+```{r}
+normal_arrTime[normal_arrTime$air_time == 695 & !is.na(normal_arrTime$air_time),]
+quantile(normal_arrTime$air_time,  na.rm = T)
+```
+
+```{r}
+normal_arrTime %>% is.na() %>% colSums()
+normal_arrTime[25099:25100,]
+```
+
+```{r}
+normal_arrTime$sched_arr_time <- chron(times. = paste0(normal_arrTime$sched_arr_time,":00"))
+
+chron(times. = paste0(normal_arrTime$sched_arr_time[25100],":00")) + normal_arrTime$arr_delay[25100]/24/60
+
+long <- length(normal_arrTime$arr_time)
+a <- normal_arrTime$arr_time
+normal_arrTime$arr_time <- chron(times. = (normal_arrTime$sched_arr_time + (normal_arrTime$arr_delay)/24/60))
+```
 
 
 ```{r}
-airports[1,]
+CheckLastDayInMonth <- function(Day)
+{
+     Day <- as.POSIXct(Day)
+     DayPlus <- Day + days(1)
+     if (month(DayPlus) > month(Day)) {
+          output <- DayPlus
+     } else {
+          output <- Day
+     }
+     return(output)
+}
+
+# change format sched_arr_time to POSIXct
+# convertToPOSIXct <- function(year, month, day, tzone, sched_arr_time, dep_time, air_time) {
+   iter <- length(normal_arrTime$year)
+   
+   outputs <- vector()
+   outputs <- as.POSIXct(outputs)
+   outputs <- force_tz(outputs, tzone = "America/New_York")
+   
+   # browser()
+for (i in 1:iter) {
+   Year <- year(normal_arrTime$sched_dep_time[i])
+   Month <- month(normal_arrTime$sched_dep_time[i])
+   Day <- day(normal_arrTime$sched_dep_time[i])
+   one <- as.POSIXct(
+      paste0(
+         Year, "-", 
+         Month, "-", 
+         Day, " ", 
+         normal_arrTime$sched_arr_time[i]), 
+      tz = normal_arrTime$tzone[i])
+   two <- (as.numeric(one - normal_arrTime$sched_dep_time[i]))*60 - normal_arrTime$air_time[i]
+   # browser()
+   if (two < 0) {
+      output <- CheckLastDayInMonth(one)
+   } else {
+      output <- one
+   }
+   # browser()
+   outputs <- c(outputs, output)
+}
+   # browser()
+   # return(outputs)
+# }
 ```
 
 ```{r}
-airports[airports$faa == "BQN",]
-airports[airports$faa == "EWR",]
+sched_arr_time_POSIXct <- convertToPOSIXct(normal_arrTime$year, 
+                                           normal_arrTime$month, 
+                                           normal_arrTime$day, 
+                                           normal_arrTime$tzone, 
+                                           normal_arrTime$sched_arr_time, 
+                                           normal_arrTime$dep_time, 
+                                           normal_arrTime$air_time)
+
+add_column(normal_arrTime, .after = "dep_delay")
 ```
+
+```{r}
+unique(normal_arrTime$sched_arr_time)
+```
+
+```{r}
+# cari arr_time & sched_arr_time yg format dua2nya cuma 1 atau 2 angka
+flights[((grepl(pattern = "^.$", x = flights$arr_time) | grepl(pattern = "^..$", x = flights$arr_time)) & 
+   (grepl(pattern = "^.$", x = flights$sched_arr_time) | grepl(pattern = "^..$", x = flights$sched_arr_time))),]
+```
+
+```{r}
+flights %>% is.na() %>% colSums()
+```
+
+```{r}
+
+```
+
+```{r}
+hm("8:30") - flights$dep_time[1]
+flights$air_time[1]
+flight_airports
+```
+
+```{r}
+flight_airports %>% is.na() %>% colSums()
+```
+
+```{r}
+create_depTime <- function(dep_time, year, month, day, tzone = "America/New_York") {
+   rows <- length(dep_time)
+   outputs <- vector()
+   outputs <- as.POSIXct(outputs)
+   outputs <- force_tz(outputs, tzone = tzone)
+   # browser()
+   for (row in 1:rows) {
+      # browser()
+      output <- ymd_hms(ymd(paste0(as.character(year[row]),"-",
+                                   as.character(month[row]),"-",
+                                   as.character(day[row])))
+                        + dep_time[row], tz = tzone)
+      as.POSIXlt(paste0(as.character(year[row]),"-",
+                                   as.character(month[row]),"-",
+                                   as.character(day[row])), 
+                 tz = "America/New_York"))
+      # browser()
+      outputs <- c(outputs, output)
+      # browser()
+   }
+   # browser()
+   return(outputs)
+}
+
+sapply(flight_airports$dep_time, 
+       create_depTime,
+       flight_airports$year, 
+       flight_airports$month, 
+       flight_airports$day)
+
+mapply(FUN = function(a,b,c,d) create_depTime(flight_airports$dep_time,
+                                              flight_airports$year, 
+                                              flight_airports$month, 
+                                              flight_airports$day))
+
+a <- create_depTime(flight_airports$dep_time, 
+               flight_airports$year, 
+               flight_airports$month,
+               flight_airports$day)
+
+flight_airports
+```
+
+
+```{r}
+sum(grepl(pattern = "^.$", x = flights$arr_time) | grepl(pattern = "^..$", x = flights$arr_time))
+```
+
+```{r}
+flights[flights$dep_delay > 1000,]
+```
+
+```{r}
+flights[flights$dep_time >= "24H 00M 0S",]
+```
+
+```{r}
+flights$arr_time
+```
+
 
 ```{r}
 sprintf(fmt = "%02d:%02d", flights$dep_delay[1])
