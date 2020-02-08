@@ -1,0 +1,326 @@
+---
+title: "Untitled"
+author: "utomoreza"
+date: "07/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(plotly)
+library(scales)
+```
+
+# First Dataset
+
+```{r}
+lifeExp <- as.data.frame(read_csv("./LifeExpectancy/life-expectancy.csv"))
+lifeExp
+```
+
+```{r}
+lifeExp_countries <- lifeExp %>% 
+     filter(!is.na(Code) & Entity != "World") %>% 
+     rename(Country = Entity, LE_age = `Life expectancy (years)`) %>% 
+     mutate(Country = as.factor(Country), Code = as.factor(Code))
+lifeExp_regions <- lifeExp %>% 
+     filter(is.na(Code) | Entity == "World") %>% 
+     select(Entity, Year, `Life expectancy (years)`) %>% 
+     rename(Region = Entity, LE_age = `Life expectancy (years)`) %>% 
+     mutate(Region = as.factor(Region))
+lifeExp_countries
+lifeExp_regions
+```
+
+2. Menampilkan grafik perbandingan pertumbuhan life expectancy negara-negara tertentu pada rentang waktu tertentu
+
+```{r}
+# Select only 5 countries in maximum
+country1 <- "Indonesia"
+country2 <- "Malaysia"
+country3 <- "Singapore"
+country4 <- "Myanmar"
+country5 <- "Thailand"
+
+# subset by countries chosen
+lifeExp_countries_chosen <- lifeExp_countries %>% 
+     filter(Country == country1 | 
+                 Country == country2 | 
+                 Country == country3 | 
+                 Country == country4 | 
+                 Country == country5)
+
+country <- paste0(lifeExp_countries_chosen$Country, "<br>",
+               "Year: ", lifeExp_countries_chosen$Year, "<br>",
+               "Life expectancy: ", round(lifeExp_countries_chosen$LE_age),1)
+
+p1a <- ggplot(lifeExp_countries_chosen, aes(x = Year,
+                              y = LE_age,
+                              text = paste0(Country, "<br>",
+                                            "Year: ", Year, "<br>",
+                                            "Life expectancy: ", round(LE_age, 1)),
+                              group = 1)) +
+     geom_line(aes(color = Country)) +
+     labs(title = "Life expectancy",
+          caption = "Source: ourworldindata.org") +
+     scale_y_continuous(breaks = seq(from = 0, to = 90, by = 10), 
+                        labels = c('0 year', 
+                                   '10 years', 
+                                   '20 years',
+                                   '30 years', 
+                                   '40 years', 
+                                   '50 years', 
+                                   '60 years', 
+                                   '70 years', 
+                                   '80 years', 
+                                   '90 years')) +
+     theme_minimal() +
+     theme(axis.title.x = element_blank(),
+           axis.title.y = element_blank(),
+           plot.title = element_text(face = "bold", size = 18),
+           plot.caption = element_text(size = 7),
+           legend.title = element_blank())
+
+plotly1a <- ggplotly(p1a, tooltip = "text")
+plotly1a
+```
+
+3. Menampilkan grafik perbandingan pertumbuhan life expectancy semua benua pada rentang waktu tertentu
+
+```{r}
+p1b <- ggplot(lifeExp_regions, aes(x = Year,
+                              y = LE_age,
+                              text = paste0(Region, "<br>",
+                                            "Year: ", Year, "<br>",
+                                            "Life expectancy: ", round(LE_age, 1)),
+                              group = 1)) +
+     geom_line(aes(color = Region)) +
+     labs(title = "Life expectancy",
+          caption = "Source: ourworldindata.org") +
+     scale_y_continuous(breaks = seq(from = 0, to = 90, by = 10), 
+                        labels = c('0 year', 
+                                   '10 years', 
+                                   '20 years',
+                                   '30 years', 
+                                   '40 years', 
+                                   '50 years', 
+                                   '60 years', 
+                                   '70 years', 
+                                   '80 years', 
+                                   '90 years')) +
+     theme_minimal() +
+     theme(axis.title.x = element_blank(),
+           axis.title.y = element_blank(),
+           plot.title = element_text(face = "bold", size = 18),
+           plot.caption = element_text(size = 7),
+           legend.title = element_blank(),
+           legend.position = "top")
+
+plotly1b <- ggplotly(p1b, tooltip = "text")
+plotly1b
+```
+
+# Second Dataset
+
+```{r}
+MenVSWomen <- as.data.frame(read_csv("./LifeExpectancy/life-expectancy-of-women-vs-life-expectancy-of-women.csv"))
+MenVSWomen
+```
+
+```{r}
+MenVSWomen_countries <- MenVSWomen %>% 
+     filter(!is.na(Code) & Entity != "World") %>% 
+     rename(Country = Entity, 
+            LE_men_age = `Life expectancy of men (years)`,
+            LE_women_age = `Life expectancy of women (years)`,
+            Total_pop = `Total population (Gapminder)`) %>% 
+     mutate(Country = as.factor(Country),
+            Code = as.factor(Code))
+MenVSWomen_regions <- MenVSWomen %>% 
+     filter(is.na(Code) | Entity == "World") %>% 
+     select(Entity, 
+            Year, 
+            `Life expectancy of men (years)`, 
+            `Life expectancy of women (years)`, 
+            `Total population (Gapminder)`) %>% 
+     rename(Region = Entity, 
+            LE_men_age = `Life expectancy of men (years)`,
+            LE_women_age = `Life expectancy of women (years)`,
+            Total_pop = `Total population (Gapminder)`) %>% 
+     mutate(Region = as.factor(Region))
+MenVSWomen_countries
+MenVSWomen_regions
+```
+
+4. Menampilkan grafik perbandingan life expectancy laki-laki dan perempuan di negara-negara dunia
+
+```{r}
+# Choose year to plot
+sliceYear <- 2000
+
+MenVSWomen_countries_yearChosen <- MenVSWomen_countries %>% 
+     filter(Year == sliceYear)
+
+p2a <- ggplot(MenVSWomen_countries_yearChosen, aes(x = LE_men_age,
+                                 y = LE_women_age,
+                                 size = Total_pop,
+                                 text = paste0(Country, "<br>",
+                                               "Men: ", round(LE_men_age,2), "<br>",
+                                               "Women: ", round(LE_women_age,2), "<br>",
+                                               "Pop: ", format(Total_pop, big.mark = ",")))) +
+     geom_jitter(aes(color = Country), alpha = 0.8) +
+     labs(title = paste0("Men's vs women's life expectancy in ", sliceYear),
+          x = "Life expectancy of men",
+          y = "Life expectancy of women") +
+     theme_bw() +
+     theme(legend.position = "none",
+           plot.title = element_text(face = "bold", size = 13))
+
+ggplotly(p2a, tooltip = "text")
+```
+
+```{r}
+MenVSWomen_regions_yearChosen <- MenVSWomen_regions %>% 
+     filter(Year == sliceYear)
+
+p2b <- ggplot(MenVSWomen_regions_yearChosen, aes(x = LE_men_age,
+                                                 y = LE_women_age,
+                                                 size = Total_pop,
+                                                 text = paste0(Region, "<br>",
+                                               "Men: ", round(LE_men_age,2), "<br>",
+                                               "Women: ", round(LE_women_age,2), "<br>",
+                                               "Pop: ", format(Total_pop, big.mark = ",")))) +
+     geom_jitter(aes(color = Region), alpha = 0.8) +
+     scale_size_continuous(labels = comma) +
+     labs(title = paste0("Men's vs women's life expectancy in ", sliceYear),
+          x = "Life expectancy of men",
+          y = "Life expectancy of women") +
+     theme_bw() +
+     theme(legend.position = "none",
+           plot.title = element_text(face = "bold", size = 13))
+
+ggplotly(p2b, tooltip = "text")
+```
+
+```{r}
+MenVSWomen_countries_long <- MenVSWomen_countries %>% 
+     pivot_longer(cols = c("LE_men_age","LE_women_age"),
+                  names_to = "Gender", values_to = "LE_age")
+MenVSWomen_countries_long$Gender <- as.factor(sapply(as.character(MenVSWomen_countries_long$Gender), switch,
+                                                     "LE_men_age" = "Men",
+                                                     "LE_women_age" = "Women"))
+
+# Choose a country
+countryChosen <- "United Kingdom"
+
+dfLong_counChosen <- MenVSWomen_countries_long %>% 
+     filter(Country == countryChosen) %>% 
+     drop_na() %>% 
+     as.data.frame()
+
+p3a <- ggplot(dfLong_counChosen, aes(x = Year,
+                                     y = ifelse(Gender == "Men",
+                                                LE_age, 
+                                                -LE_age),
+                                     fill = Gender,
+                                     text = paste0(Year, "<br>",
+                                            "Life exp: ", round(LE_age,2),
+                                            " years"))) +
+        geom_col() +
+        coord_flip() + 
+        # scale_fill_manual(labels = c("Men","Women"), values = c("blue","red")) +
+        scale_fill_brewer(palette = "Set1") +
+        scale_y_continuous(labels = abs,
+                           limits = max(dfLong_counChosen$LE_age)*c(-1,1)) +
+        labs(title = paste0("Life expectancy by gender in ", countryChosen),
+             y = "Life expectancy",
+             x = NULL) +
+        theme_calc() +
+        theme(plot.title = element_text(face = "bold", size = 12))
+
+ggplotly(p3a, tooltip = "text") 
+```
+
+```{r}
+MenVSWomen_regions_long <- MenVSWomen_regions %>% 
+     pivot_longer(cols = c("LE_men_age","LE_women_age"),
+                  names_to = "Gender", values_to = "LE_age")
+MenVSWomen_regions_long$Gender <- as.factor(sapply(
+        as.character(MenVSWomen_regions_long$Gender), switch,
+        "LE_men_age" = "Men",
+        "LE_women_age" = "Women"))
+
+# Choose a region
+regionChosen <- "Africa"
+
+dfLong_regChosen <- MenVSWomen_regions_long %>% 
+     filter(Region == regionChosen) %>% 
+     drop_na() %>% 
+     as.data.frame()
+
+p3b <- ggplot(dfLong_regChosen, aes(x = Year,
+                                     y = ifelse(Gender == "Men",
+                                                LE_age, 
+                                                -LE_age),
+                                     fill = Gender,
+                                     text = paste0(Year, "<br>",
+                                            "Life exp: ", round(LE_age,2),
+                                            " years"))) +
+        geom_col() +
+        coord_flip() + 
+        # scale_fill_manual(labels = c("Men","Women"), values = c("blue","red")) +
+        scale_fill_brewer(palette = "Set1") +
+        scale_y_continuous(labels = abs,
+                           limits = max(dfLong_regChosen$LE_age)*c(-1,1)) +
+        labs(title = paste0("Life expectancy by gender in ", regionChosen),
+             y = "Life expectancy",
+             x = NULL) +
+        theme_calc() +
+        theme(plot.title = element_text(face = "bold", size = 12))
+
+ggplotly(p3b, tooltip = "text") 
+```
+
+# Third Dataset
+
+```{r}
+medianAge <- as.data.frame(read_csv("./LifeExpectancy/median-age.csv"))
+medianAge
+```
+
+```{r}
+medianAge_countries <- medianAge %>% 
+     filter(!is.na(Code) & Entity != "World") %>% 
+     rename(Country = Entity, 
+            Median_Age = `UN Population Division (Median Age) (2017) (years)`) %>% mutate(Country = as.factor(Country),
+            Code = as.factor(Code))
+medianAge_regions <- medianAge %>% 
+     filter(is.na(Code) | Entity == "World") %>% 
+     select(Entity, 
+            Year, 
+            `UN Population Division (Median Age) (2017) (years)`) %>% 
+     rename(Region = Entity, 
+            Median_Age = `UN Population Division (Median Age) (2017) (years)`) %>% mutate(Region = as.factor(Region))
+medianAge_countries
+medianAge_regions
+```
+
+5. Menampilkan grafik perbandingan median age antara negara-negara tertentu pada rentang waktu tertentu
+
+```{r}
+medianAge_countries_ <- medianAge_countries %>% 
+        filter(Country == "China" |
+                       Country == "India" |
+                       Country == "United States")
+
+ggplot(medianAge_countries_, aes(x = Country,
+                                 y = Median_Age)) +
+        geom_boxplot() +
+        geom_
+```
+
