@@ -25,7 +25,11 @@ dashboardPage(
                      icon = icon("globe-asia")),
             menuItem(text = "Data",
                      tabName = "dat",
-                     icon = icon("table"))
+                     icon = icon("table")),
+            menuItem(text = "Get Codes",
+                     tabName = "code",
+                     icon = icon("code"),
+                     href = )
         )
     ),
     dashboardBody(

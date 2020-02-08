@@ -286,7 +286,115 @@ p3b <- ggplot(dfLong_regChosen, aes(x = Year,
 ggplotly(p3b, tooltip = "text") 
 ```
 
+```{r}
+# define a function to convert factor to numeric
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+
+df_pop <- MenVSWomen_regions %>% 
+        filter(Region != "World" & Region != "Saint Barthlemy") %>% 
+        select(Region, Year, Total_pop) %>% 
+        drop_na() %>% 
+        mutate(Year = as.factor(Year))
+
+Total <- df_pop %>% 
+        group_by(Year) %>% 
+        summarise(sum_Year = sum(Total_pop)) %>% 
+        ungroup()
+
+dfpopPercent <- left_join(df_pop, Total, by = c("Year" = "Year")) %>% 
+        mutate(Ratio = Total_pop/sum_Year*100,
+               Year = as.numeric.factor(Year)) %>% 
+        select(Region, Year, Total_pop, Ratio)
+```
+
+```{r}
+options(scipen = 999)
+p4 <- ggplot(dfpopPercent, aes(x = Year,
+                               y = Total_pop,
+                               text = paste0(Region, "<br>",
+                                             "Year: ", Year, "<br>",
+                                             "Pops: ", format(Total_pop, big.mark = ",")),
+                               group = Region)) +
+        geom_area(aes(fill = Region),
+                  position = "fill",
+                  color = "white",
+                  size = 0.2) +
+        labs(title = "World Population - Normalized",
+             x = "Year",
+             y = NULL) +
+        scale_x_continuous(labels = comma) +
+        scale_fill_brewer(palette = "Dark2") +
+        scale_y_continuous(labels = percent) +
+        theme_calc() +
+        theme(plot.title = element_text(face = "bold", size = 15))
+
+ggplotly(p4, tooltip = "text")
+
+```
+
 # Third Dataset
+
+```{r}
+LEvsGDP <- as.data.frame(read_csv("./LifeExpectancy/life-expectancy-vs-gdp-per-capita.csv"))
+LEvsGDP
+```
+
+```{r}
+LEvsGDP_countries <- LEvsGDP %>% 
+     filter(!is.na(Code) & Entity != "World") %>% 
+     rename(Country = Entity, 
+            LE_age = `Life expectancy at birth (years)`,
+            GDP = `GDP per capita ($)`,
+            Total_pop = `Population by country`) %>% 
+     mutate(Country = as.factor(Country),
+            Code = as.factor(Code))
+LEvsGDP_regions <- LEvsGDP %>% 
+     filter(is.na(Code) | Entity == "World") %>% 
+     select(Entity, 
+            Year, 
+            `Life expectancy at birth (years)`,
+            `GDP per capita ($)`,
+            `Population by country`) %>% 
+     rename(Region = Entity, 
+            LE_men = `Life expectancy at birth (years)`,
+            GDP = `GDP per capita ($)`,
+            Total_pop = `Population by country`) %>% 
+     mutate(Region = as.factor(Region))
+LEvsGDP_countries
+LEvsGDP_regions
+```
+
+```{r}
+# define a function to add 'years' at the end of a string
+add_year <- function(x) {return(paste(x, 'years'))}
+
+# Choose year to plot
+sliceYear <- 2010
+
+DF_LEvsGDPCountries <- LEvsGDP_countries %>% 
+     filter(Year == sliceYear)
+
+p5 <- ggplot(DF_LEvsGDPCountries, aes(x = LE_age,
+                                      y = GDP,
+                                      size = Total_pop,
+                                      text = paste0(Country, "<br>",
+                                                    "Life exp: ", round(LE_age,2), "<br>",
+                                                    "GDP: $", format(GDP, big.mark = ","), "<br>",
+                                                    "Pops: ", format(Total_pop, big.mark = ",")))) +
+        geom_jitter(aes(color = Country), alpha = 0.6) +
+        labs(title = paste0("Life expectancy vs GDP per capita in ", sliceYear),
+             x = NULL,
+             y = NULL) +
+        scale_y_continuous(labels = dollar) +
+        scale_x_continuous(labels = add_year) +
+        theme_bw() +
+        theme(legend.position = "none",
+              plot.title = element_text(face = "bold", size = 13))
+
+ggplotly(p5, tooltip = "text")
+```
+
+# Rest
 
 ```{r}
 medianAge <- as.data.frame(read_csv("./LifeExpectancy/median-age.csv"))
