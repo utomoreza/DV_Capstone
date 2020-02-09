@@ -16,6 +16,14 @@ library(plotly)
 library(scales)
 ```
 
+```{r}
+# define a function to add 'years' at the end of a string
+add_year <- function(x) {return(paste(x, 'years'))}
+
+# define a function to convert factor to numeric
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+```
+
 # First Dataset
 
 ```{r}
@@ -25,11 +33,11 @@ lifeExp
 
 ```{r}
 lifeExp_countries <- lifeExp %>% 
-     filter(!is.na(Code) & Entity != "World") %>% 
+     filter((!is.na(Code) | Entity == "Saint Barthlemy") & Entity != "World") %>% 
      rename(Country = Entity, LE_age = `Life expectancy (years)`) %>% 
      mutate(Country = as.factor(Country), Code = as.factor(Code))
 lifeExp_regions <- lifeExp %>% 
-     filter(is.na(Code) | Entity == "World") %>% 
+     filter((is.na(Code) | Entity == "World") & Entity != "Saint Barthlemy") %>% 
      select(Entity, Year, `Life expectancy (years)`) %>% 
      rename(Region = Entity, LE_age = `Life expectancy (years)`) %>% 
      mutate(Region = as.factor(Region))
@@ -69,16 +77,7 @@ p1a <- ggplot(lifeExp_countries_chosen, aes(x = Year,
      labs(title = "Life expectancy",
           caption = "Source: ourworldindata.org") +
      scale_y_continuous(breaks = seq(from = 0, to = 90, by = 10), 
-                        labels = c('0 year', 
-                                   '10 years', 
-                                   '20 years',
-                                   '30 years', 
-                                   '40 years', 
-                                   '50 years', 
-                                   '60 years', 
-                                   '70 years', 
-                                   '80 years', 
-                                   '90 years')) +
+                        labels = add_year) +
      theme_minimal() +
      theme(axis.title.x = element_blank(),
            axis.title.y = element_blank(),
@@ -103,16 +102,7 @@ p1b <- ggplot(lifeExp_regions, aes(x = Year,
      labs(title = "Life expectancy",
           caption = "Source: ourworldindata.org") +
      scale_y_continuous(breaks = seq(from = 0, to = 90, by = 10), 
-                        labels = c('0 year', 
-                                   '10 years', 
-                                   '20 years',
-                                   '30 years', 
-                                   '40 years', 
-                                   '50 years', 
-                                   '60 years', 
-                                   '70 years', 
-                                   '80 years', 
-                                   '90 years')) +
+                        labels = add_year) +
      theme_minimal() +
      theme(axis.title.x = element_blank(),
            axis.title.y = element_blank(),
@@ -134,7 +124,7 @@ MenVSWomen
 
 ```{r}
 MenVSWomen_countries <- MenVSWomen %>% 
-     filter(!is.na(Code) & Entity != "World") %>% 
+     filter((!is.na(Code) | Entity == "Saint Barthlemy") & Entity != "World") %>% 
      rename(Country = Entity, 
             LE_men_age = `Life expectancy of men (years)`,
             LE_women_age = `Life expectancy of women (years)`,
@@ -142,7 +132,7 @@ MenVSWomen_countries <- MenVSWomen %>%
      mutate(Country = as.factor(Country),
             Code = as.factor(Code))
 MenVSWomen_regions <- MenVSWomen %>% 
-     filter(is.na(Code) | Entity == "World") %>% 
+     filter((is.na(Code) | Entity == "World") & Entity != "Saint Barthlemy") %>%
      select(Entity, 
             Year, 
             `Life expectancy of men (years)`, 
@@ -210,7 +200,9 @@ ggplotly(p2b, tooltip = "text")
 ```{r}
 MenVSWomen_countries_long <- MenVSWomen_countries %>% 
      pivot_longer(cols = c("LE_men_age","LE_women_age"),
-                  names_to = "Gender", values_to = "LE_age")
+                  names_to = "Gender", values_to = "LE_age") %>% 
+        as.data.frame()
+
 MenVSWomen_countries_long$Gender <- as.factor(sapply(as.character(MenVSWomen_countries_long$Gender), switch,
                                                      "LE_men_age" = "Men",
                                                      "LE_women_age" = "Women"))
@@ -249,7 +241,9 @@ ggplotly(p3a, tooltip = "text")
 ```{r}
 MenVSWomen_regions_long <- MenVSWomen_regions %>% 
      pivot_longer(cols = c("LE_men_age","LE_women_age"),
-                  names_to = "Gender", values_to = "LE_age")
+                  names_to = "Gender", values_to = "LE_age") %>% 
+        as.data.frame()
+
 MenVSWomen_regions_long$Gender <- as.factor(sapply(
         as.character(MenVSWomen_regions_long$Gender), switch,
         "LE_men_age" = "Men",
@@ -287,9 +281,6 @@ ggplotly(p3b, tooltip = "text")
 ```
 
 ```{r}
-# define a function to convert factor to numeric
-as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
-
 df_pop <- MenVSWomen_regions %>% 
         filter(Region != "World" & Region != "Saint Barthlemy") %>% 
         select(Region, Year, Total_pop) %>% 
@@ -356,7 +347,7 @@ LEvsGDP_regions <- LEvsGDP %>%
             `GDP per capita ($)`,
             `Population by country`) %>% 
      rename(Region = Entity, 
-            LE_men = `Life expectancy at birth (years)`,
+            LE_age = `Life expectancy at birth (years)`,
             GDP = `GDP per capita ($)`,
             Total_pop = `Population by country`) %>% 
      mutate(Region = as.factor(Region))
@@ -365,23 +356,127 @@ LEvsGDP_regions
 ```
 
 ```{r}
-# define a function to add 'years' at the end of a string
-add_year <- function(x) {return(paste(x, 'years'))}
+countries1 <- as.data.frame(read_tsv("./LifeExpectancy/countries.tsv", na = ""))
 
+countries2 <- as.data.frame(read_tsv("./LifeExpectancy/countriesGoogle.tsv", na = "")) %>% 
+        select(country, latitude, longitude)
+
+countries <- left_join(countries1, countries2, by = c("Country Code" = "country"))
+
+for (i in 1:length(countries$latitude)) {
+        if (is.na(countries$latitude[i])) {
+                countries$latitude[i] <- replace_na(countries$latitude[i], 
+                                                    countries$`Capital Latitude`[i])
+                countries$longitude[i] <- replace_na(countries$longitude[i], 
+                                                    countries$`Capital Longitude`[i])
+        }        
+}
+countries_ <- countries %>% 
+        rename(Country = `Country Name`,
+               Capital = `Capital Name`,
+               Continent = `Continent Name`,
+               Latitude = latitude,
+               Longitude = longitude) %>% 
+        select(Country, Capital, Continent, Latitude, Longitude) %>% 
+        mutate(Continent = as.factor(Continent))
+countries_$Country[52] <- "Cote d'Ivoire"
+countries_$Capital[125] <- "Macau"
+countries_$Country[174] <- "Democratic Republic of Congo"
+countries_$Country[217] <- "Gambia"
+# countries_$Country[76] <- "Polynesia"
+
+LEvsGDP_countries_ <- LEvsGDP_countries %>% 
+        mutate(Country = as.character.factor(Country))
+LEvsGDP_countries_$Country <- str_replace_all(LEvsGDP_countries_$Country, 
+                                              "Brunei", 
+                                              "Brunei Darussalam")
+LEvsGDP_countries_$Country <- str_replace_all(LEvsGDP_countries_$Country, 
+                                              "Macao", 
+                                              "Macau")
+LEvsGDP_countries_$Country <- str_replace_all(LEvsGDP_countries_$Country, 
+                                              "^Congo$", 
+                                              "Democratic Republic of Congo")
+LEvsGDP_countries_$Country <- str_replace_all(LEvsGDP_countries_$Country, 
+                                              "^Micronesia \\(country\\)$", 
+                                              "Federated States of Micronesia")
+LEvsGDP_countries_$Country <- str_replace_all(LEvsGDP_countries_$Country, 
+                                              "Timor", 
+                                              "Timor-Leste")
+LEvsGDP_countries_$Country <- str_replace_all(LEvsGDP_countries_$Country, 
+                                              "^Polynesia$", 
+                                              "French Polynesia")
+
+LEvsGDP_countrFull <- left_join(LEvsGDP_countries_,
+                                countries_,
+                                by = c("Country" = "Country")) %>% 
+        mutate(Country = as.factor(Country)) %>% 
+        filter(Country != "Channel Islands" & 
+                       Country != "French Guiana" &
+                       Country != "Macacu" &
+                       Country != "Melanesia" &
+                       Country != "Reunion" &
+                       Country != "Curacao" &
+                       Country != "Martinique" &
+                       Country != "Guadeloupe" &
+                       Country != "Mayotte" &
+                       Country != "United States Virgin Islands")
+
+LEvsGDP_countrFull[9980:10073,"Capital"] <- "Prague"
+LEvsGDP_countrFull[9980:10073,"Continent"] <- "Europe"
+LEvsGDP_countrFull[9980:10073,"Latitude"] <- 49.81749
+LEvsGDP_countrFull[9980:10073,"Longitude"] <- 15.47296
+
+LEvsGDP_countrFull[44622:44841,"Capital"] <- "Vatican"
+LEvsGDP_countrFull[44622:44841,"Continent"] <- "Europe"
+LEvsGDP_countrFull[44622:44841,"Latitude"] <- 41.87194
+LEvsGDP_countrFull[44622:44841,"Longitude"] <- 12.56738
+
+LEvsGDP_countrFull
+```
+
+```{r}
 # Choose year to plot
 sliceYear <- 2010
 
-DF_LEvsGDPCountries <- LEvsGDP_countries %>% 
+DF_LEvsGDPCountries <- LEvsGDP_countrFull %>% 
      filter(Year == sliceYear)
 
-p5 <- ggplot(DF_LEvsGDPCountries, aes(x = LE_age,
+p5a <- ggplot(DF_LEvsGDPCountries, aes(x = LE_age,
                                       y = GDP,
                                       size = Total_pop,
                                       text = paste0(Country, "<br>",
                                                     "Life exp: ", round(LE_age,2), "<br>",
                                                     "GDP: $", format(GDP, big.mark = ","), "<br>",
                                                     "Pops: ", format(Total_pop, big.mark = ",")))) +
-        geom_jitter(aes(color = Country), alpha = 0.6) +
+        geom_jitter(aes(color = Continent), alpha = 0.6) +
+        labs(title = paste0("Life expectancy vs GDP per capita in ", sliceYear),
+             x = NULL,
+             y = NULL) +
+        scale_y_continuous(labels = dollar) +
+        scale_x_continuous(labels = add_year) +
+        scale_color_brewer(palette = "Set1") +
+        theme_bw() +
+        theme(plot.title = element_text(face = "bold", size = 13))
+
+ggplotly(p5a, tooltip = "text")
+```
+
+```{r}
+# Choose year to plot
+sliceYear <- 2005
+
+DF_LEvsGDPRegions <- LEvsGDP_regions %>% 
+     filter(Year == sliceYear) %>% 
+        drop_na()
+
+p5b <- ggplot(DF_LEvsGDPRegions, aes(x = LE_age,
+                                      y = GDP,
+                                      # size = Total_pop,
+                                      text = paste0(Region, "<br>",
+                                                    "Life exp: ", round(LE_age,2), "<br>",
+                                                    "GDP: $", format(GDP, big.mark = ","), "<br>",
+                                                    "Pops: ", format(Total_pop, big.mark = ",")))) +
+        geom_jitter(aes(color = Region), alpha = 0.6) +
         labs(title = paste0("Life expectancy vs GDP per capita in ", sliceYear),
              x = NULL,
              y = NULL) +
@@ -391,8 +486,13 @@ p5 <- ggplot(DF_LEvsGDPCountries, aes(x = LE_age,
         theme(legend.position = "none",
               plot.title = element_text(face = "bold", size = 13))
 
-ggplotly(p5, tooltip = "text")
+ggplotly(p5b, tooltip = "text")
 ```
+
+```{r}
+
+```
+
 
 # Rest
 
