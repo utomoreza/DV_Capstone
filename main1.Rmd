@@ -93,10 +93,6 @@ lifeExp_countries_chosen <- lifeExp_countries %>%
                  Country == country4 | 
                  Country == country5)
 
-country <- paste0(lifeExp_countries_chosen$Country, "<br>",
-               "Year: ", lifeExp_countries_chosen$Year, "<br>",
-               "Life expectancy: ", round(lifeExp_countries_chosen$LE_age),1)
-
 p1a <- ggplot(lifeExp_countries_chosen, aes(x = Year,
                               y = LE_age,
                               text = paste0(Country, "<br>",
@@ -122,6 +118,11 @@ plotly1a
 3. Menampilkan grafik perbandingan pertumbuhan life expectancy semua benua pada rentang waktu tertentu
 
 ```{r}
+# lifeExp_regions_wide <- lifeExp_regions %>% 
+#         pivot_wider(names_from = "Region", values_from = "LE_age")
+
+
+
 p1b <- ggplot(lifeExp_regions, aes(x = Year,
                               y = LE_age,
                               text = paste0(Region, "<br>",
@@ -202,6 +203,10 @@ p2a <- ggplot(MenVSWomen_countries_yearChosen, aes(x = LE_men_age,
            plot.title = element_text(face = "bold", size = 13))
 
 ggplotly(p2a, tooltip = "text")
+```
+
+```{r}
+MenVSWomen_countries[MenVSWomen_countries$Year == 2015,]
 ```
 
 ```{r}
