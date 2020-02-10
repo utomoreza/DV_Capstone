@@ -278,7 +278,7 @@ MenVSWomen_regions_long <- MenVSWomen_regions %>%
      pivot_longer(cols = c("LE_men_age","LE_women_age"),
                   names_to = "Gender", values_to = "LE_age") %>% 
         as.data.frame()
-
+        
 MenVSWomen_regions_long$Gender <- as.factor(sapply(
         as.character(MenVSWomen_regions_long$Gender), switch,
         "LE_men_age" = "Men",
@@ -436,8 +436,6 @@ LEvsGDP_countrFull[44622:44841,"Capital"] <- "Vatican"
 LEvsGDP_countrFull[44622:44841,"Continent"] <- "Europe"
 LEvsGDP_countrFull[44622:44841,"Latitude"] <- 41.87194
 LEvsGDP_countrFull[44622:44841,"Longitude"] <- 12.56738
-
-LEvsGDP_countrFull
 ```
 
 ```{r}

@@ -1,0 +1,12 @@
+name: LifeExpectancy
+title: LifeExpectancy
+username:
+account: utomoreza
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1787652
+bundleId: 2789225
+url: https://utomoreza.shinyapps.io/LifeExpectancy/
+when: 1581352089.31254
+asMultiple: FALSE
+asStatic: FALSE
