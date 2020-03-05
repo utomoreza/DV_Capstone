@@ -1,0 +1,9 @@
+References to apply leaflet with heatmap:
+
+https://towardsdatascience.com/a-complete-guide-to-an-interactive-geographical-map-using-python-f4c5197e23e0
+https://bhaskarvk.github.io/user2017.geodataviz/notebooks/03-Interactive-Maps.nb.html
+https://rstudio.github.io/leaflet/choropleths.html
+https://www.earthdatascience.org/courses/earth-analytics/get-data-using-apis/leaflet-r/
+https://learn.r-journalism.com/en/mapping/leaflet_maps/leaflet/
+https://datascienceplus.com/building-interactive-maps-with-leaflet/
+

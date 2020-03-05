@@ -7,6 +7,7 @@ library(plotly)
 library(scales)
 library(DT)
 library(shinycssloaders)
+library(leaflet)
 options(shiny.maxRequestSize=200*1024^2)
 
 # set loading spinner color
